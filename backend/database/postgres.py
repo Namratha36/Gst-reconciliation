@@ -2,10 +2,13 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-POSTGRES_URL = os.getenv("POSTGRES_URL", "postgresql://gst_user:gst_password@localhost:5432/graphgst")
+POSTGRES_URL = os.getenv("POSTGRES_URL", "sqlite:///./graphgst.db")
 
-# Create engine
-engine = create_engine(POSTGRES_URL)
+# Create engine (SQLite specific connect_args)
+if POSTGRES_URL.startswith("sqlite"):
+    engine = create_engine(POSTGRES_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(POSTGRES_URL)
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

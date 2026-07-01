@@ -3,6 +3,7 @@ import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadCloud } from "lucide-react";
+import { toast } from "sonner";
 
 export default function UploadData() {
   const [files, setFiles] = useState<FileList | null>(null);
@@ -19,11 +20,14 @@ export default function UploadData() {
     }
 
     try {
+      toast("Uploading files...", { description: "Please wait while we process your CSV files." });
       await api.post("/upload/csv", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      toast.success("Files uploaded successfully!");
       setMessage("Files uploaded successfully! Background processing initiated.");
     } catch (err) {
+      toast.error("Upload failed", { description: "Please ensure they are GSTR1, GSTR2B, or GSTR3B CSVs." });
       setMessage("Failed to upload files. Please ensure they are GSTR1, GSTR2B, or GSTR3B CSVs.");
     } finally {
       setUploading(false);

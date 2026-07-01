@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -16,9 +17,10 @@ export default function Register() {
     e.preventDefault();
     try {
       await api.post("/auth/register", { email, password, full_name: fullName });
+      toast.success("Account created successfully. Please login.");
       navigate("/login");
-    } catch (err) {
-      alert("Registration failed.");
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Registration failed. Backend might be down.");
     }
   };
 

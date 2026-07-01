@@ -45,19 +45,23 @@ export default function GraphExplorer() {
   }, []);
 
   return (
-    <div className="w-full h-screen p-4 flex flex-col space-y-4">
-      <h1 className="text-3xl font-bold">Knowledge Graph Explorer</h1>
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div className="w-full h-[85vh] p-4 flex flex-col space-y-4">
+      <div>
+        <h1 className="text-3xl font-bold">Knowledge Graph Explorer</h1>
+        <p className="text-muted-foreground mt-1">Interactive visualization of Vendor-Invoice-Buyer relationships.</p>
+      </div>
+      <div className="flex-1 glass border border-border/50 rounded-xl shadow-sm overflow-hidden relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView
+          className="bg-background"
         >
-          <MiniMap />
-          <Controls />
-          <Background color="#aaa" gap={16} />
+          <MiniMap className="bg-background border-border/50 rounded-lg" maskColor="hsl(var(--muted))" />
+          <Controls className="bg-background border-border/50 rounded-lg" />
+          <Background color="hsl(var(--muted-foreground))" gap={16} />
         </ReactFlow>
       </div>
     </div>
