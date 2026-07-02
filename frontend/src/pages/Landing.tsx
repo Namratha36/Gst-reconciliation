@@ -1,24 +1,23 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck, Network, Zap } from "lucide-react";
+import { ArrowRight, ShieldCheck, Network, Activity } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Navbar */}
-      <header className="glass sticky top-0 z-50 border-b">
+      <header className="bg-card border-b sticky top-0 z-50">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="font-bold text-2xl text-primary tracking-tight flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white">G</div>
-            GraphGST <span className="font-light text-foreground">AI</span>
+          <div className="font-bold text-lg text-foreground tracking-tight flex items-center gap-2">
+            <Network className="w-5 h-5 text-secondary" />
+            GraphGST Enterprise
           </div>
           <nav className="flex items-center gap-4">
             <Link to="/login">
-              <Button variant="ghost" className="text-muted-foreground">Log in</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground font-medium">Log In</Button>
             </Link>
             <Link to="/register">
-              <Button className="rounded-full px-6 shadow-lg shadow-primary/25">Get Started</Button>
+              <Button size="sm" className="bg-primary text-primary-foreground">Contact Sales</Button>
             </Link>
           </nav>
         </div>
@@ -26,74 +25,68 @@ export default function Landing() {
 
       {/* Hero Section */}
       <main className="flex-1 flex flex-col">
-        <section className="relative pt-32 pb-20 px-6">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
-          
-          <div className="container mx-auto text-center max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-                Intelligent GST <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Reconciliation</span>
+        <section className="py-24 px-6 border-b bg-card">
+          <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-semibold">
+                <ShieldCheck className="w-4 h-4" />
+                Auditor Approved
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">
+                Enterprise GST Reconciliation & Intelligence
               </h1>
-              <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-                Detect anomalies, mitigate vendor risks, and recover Input Tax Credit instantly using Knowledge Graphs and Gemini AI. Built for modern finance teams.
+              <p className="text-base text-muted-foreground max-w-lg leading-relaxed">
+                GraphGST AI provides government agencies and financial institutions with a structural overview of supply chain risks, detecting ITC anomalies instantly via Knowledge Graphs.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex items-center gap-4 pt-4">
                 <Link to="/dashboard">
-                  <Button size="lg" className="rounded-full px-8 h-14 text-lg shadow-xl shadow-primary/20 w-full sm:w-auto">
-                    Open Dashboard <ArrowRight className="ml-2 w-5 h-5" />
+                  <Button className="h-10 px-6 bg-secondary text-white hover:bg-secondary/90">
+                    Launch Platform <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-lg glass w-full sm:w-auto">
-                    View Demo
+                  <Button variant="outline" className="h-10 px-6">
+                    Request Demo
                   </Button>
                 </Link>
               </div>
-            </motion.div>
+            </div>
+            
+            <div className="flex-1 w-full bg-muted rounded-md border p-6 flex flex-col justify-center items-center h-[300px] shadow-sm">
+              <Network className="w-16 h-16 text-muted-foreground mb-4" />
+              <p className="text-sm font-medium text-muted-foreground">Interactive System Architecture Visualization</p>
+              <p className="text-xs text-muted-foreground mt-2 max-w-xs text-center">Graph nodes map vendors, invoices, and buyers to expose circular trading and non-compliant clusters.</p>
+            </div>
           </div>
         </section>
 
         {/* Features Grid */}
-        <section className="py-20 bg-muted/30">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-6 max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
                   icon: Network,
-                  title: "Knowledge Graphs",
-                  desc: "Visualize your entire supply chain. Spot non-compliant vendors immediately with Neo4j."
+                  title: "Structural Risk Mapping",
+                  desc: "Utilize Neo4j graph databases to traverse deep supply chain layers and expose hidden vendor linkages."
                 },
                 {
-                  icon: Zap,
-                  title: "AI Risk Explanations",
-                  desc: "Gemini AI turns complex tax code mismatches into plain business English recommendations."
+                  icon: Activity,
+                  title: "Automated Reconciliation",
+                  desc: "Ingest GSTR-1, 2B, and 3B returns to systematically identify missing invoices and value variances."
                 },
                 {
                   icon: ShieldCheck,
-                  title: "ITC Protection",
-                  desc: "Automated engine flags invoices at risk, saving enterprises millions in unrecovered tax."
+                  title: "Audit Compliance Logging",
+                  desc: "Maintain a strict, immutable audit trail of all detected anomalies and system interventions."
                 }
               ].map((f, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                  viewport={{ once: true }}
-                  className="glass p-8 rounded-3xl border border-white/20"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                    <f.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{f.desc}</p>
-                </motion.div>
+                <div key={i} className="p-6 rounded-md border bg-card shadow-sm">
+                  <f.icon className="w-5 h-5 text-secondary mb-4" />
+                  <h3 className="text-sm font-semibold text-foreground mb-2">{f.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                </div>
               ))}
             </div>
           </div>
