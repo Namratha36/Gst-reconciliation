@@ -63,3 +63,31 @@ An Input Tax Credit (ITC) of **₹{req.itc_at_risk}** is currently at risk. You 
         return {"explanation": response.text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+class ChatMessage(BaseModel):
+    message: str
+
+@router.post("/chat")
+async def copilot_chat(req: ChatMessage):
+    if GEMINI_API_KEY == "MOCK_KEY_FOR_DEV":
+        # Dynamic fallback responses based on keywords
+        msg = req.message.lower()
+        if "vendor" in msg:
+            mock_response = "Vendor ABC Logistics is your highest risk vendor with a compliance score of 42. They have 12 pending invoices causing ₹24.5L in ITC blockage."
+        elif "itc" in msg or "recover" in msg:
+            mock_response = "Currently, you have ₹86.5L of ITC at risk. However, ₹22.1L is immediately recoverable if you follow up on pending GSTR-1 filings."
+        elif "mismatch" in msg:
+            mock_response = "I found 45 GST mismatches. The most common error is 'GSTR-2B Missing', which occurs when your vendor hasn't uploaded their sales invoice."
+        elif "hello" in msg or "hi" in msg:
+            mock_response = "Hello! I am your GraphGST AI Copilot. I can analyze vendors, identify ITC risks, and explain complex GST mismatches."
+        else:
+            mock_response = f"I've analyzed your query regarding '{req.message}'. Based on the platform data, there are no immediate critical anomalies, but I recommend checking the Fraud Network for structural risks."
+        return {"response": mock_response}
+    
+    try:
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        prompt = f"You are an AI GST Copilot for GraphGST AI, an enterprise fintech SaaS. Answer the following user query professionally and concisely: {req.message}"
+        response = model.generate_content(prompt)
+        return {"response": response.text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

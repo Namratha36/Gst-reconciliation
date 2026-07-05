@@ -56,10 +56,10 @@ module.exports = {
         },
       },
       borderRadius: {
-        xl: "12px",
-        lg: "8px",
-        md: "6px",
-        sm: "4px",
+        xl: "16px",
+        lg: "12px",
+        md: "8px",
+        sm: "6px",
       },
       keyframes: {
         "accordion-down": {

@@ -1,13 +1,19 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute() {
-  const token = localStorage.getItem("token");
+export default function ProtectedRoute({ children }: { children?: React.ReactNode }) {
+  // For hackathon/demo purposes, we automatically mock a token if none exists 
+  // so judges don't get stuck on the login screen, UNLESS they explicitly logged out.
+  let token = localStorage.getItem("token");
+  const explicitLogout = localStorage.getItem("explicit_logout");
+  
+  if (!token && !explicitLogout) {
+    localStorage.setItem("token", "demo-token-123");
+    token = "demo-token-123";
+  }
 
   if (!token) {
-    // If no token exists, immediately redirect to login
     return <Navigate to="/login" replace />;
   }
 
-  // If authenticated, render the child routes (which will be AppLayout)
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 }

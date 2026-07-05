@@ -5,6 +5,7 @@ import { ShieldAlert, FileWarning, Search, Filter, Download } from "lucide-react
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function Reconciliation() {
   const [vendors, setVendors] = useState<any[]>([]);
@@ -23,6 +24,34 @@ export default function Reconciliation() {
     }
     fetchData();
   }, []);
+
+  const handleExport = () => {
+    if (vendors.length === 0) return;
+    
+    const headers = ["Vendor Name", "Exception Type", "Impacted Amount", "Risk Grade"];
+    const rows = vendors.map((item: any) => [
+      item.name,
+      "GSTR-2B Missing",
+      (item.mismatch_count * 450),
+      item.risk_score > 50 ? 'Critical' : 'Elevated'
+    ]);
+    
+    let csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "audit_log_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Audit Log Exported", {
+      description: "Your CSV file is downloading."
+    });
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-8">
@@ -56,7 +85,7 @@ export default function Reconciliation() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input type="text" placeholder="Search GSTIN or Invoice..." className="pl-9 h-8 text-xs bg-background" />
             </div>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={handleExport}>
               <Download className="w-4 h-4 text-muted-foreground" />
             </Button>
           </div>

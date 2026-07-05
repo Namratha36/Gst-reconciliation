@@ -1,72 +1,50 @@
-# GraphGST AI Enterprise
+# GraphGST AI 🚀
 
-**GraphGST AI** is an advanced, enterprise-grade Input Tax Credit (ITC) reconciliation and fraud detection platform. Designed for tax auditors, financial institutions, and government agencies, it leverages Knowledge Graphs and AI to instantly detect anomalies, map structural supply chain risks, and automate compliance workflows.
+> **The intelligence layer for your supply chain.**
 
-## Features
+GraphGST AI is an enterprise-grade Fintech SaaS platform built for CFOs, Tax Auditors, and Compliance Teams. It leverages Neo4j Knowledge Graphs and Gemini AI to instantly detect circular trading rings, automate GSTR reconciliation, and automatically recover blocked Input Tax Credit (ITC).
 
-- **Structural Risk Mapping**: Built on Neo4j, the platform visualizes complex vendor-invoice-buyer relationships to expose circular trading and non-compliant clusters.
-- **Automated Reconciliation**: High-speed processing of GSTR-1, GSTR-2B, and GSTR-3B returns to systematically identify missing invoices and value variances.
-- **AI-Powered Explanations**: Integrates with Google Gemini AI to translate complex tax code mismatches into actionable business recommendations.
-- **Enterprise Intelligence Dashboard**: A strict, information-dense interface inspired by Palantir and Datadog, optimized for auditors and risk analysts.
-- **Audit Compliance Logging**: Maintains an immutable audit trail of all detected anomalies and system interventions.
+## 🌟 Key Features
 
-## Technology Stack
+*   **Enterprise Design System**: A strict, data-dense Palantir-inspired UI built with TailwindCSS, Shadcn UI, and Framer Motion.
+*   **Knowledge Graph Explorer**: Visualize deep supply chain relationships and expose hidden circular trading loops using React Flow.
+*   **Automated Reconciliation Engine**: Process GSTR-1, GSTR-2B, and GSTR-3B data to identify value mismatches and missing invoices instantly.
+*   **AI GST Copilot**: A context-aware chat assistant powered by Gemini AI. Includes **Voice Recognition** for hands-free queries.
+*   **What-If ITC Simulator**: Project the exact financial impact (ITC recovery & risk reduction) of fixing specific vendor compliance issues.
+*   **Vendor Intelligence Center**: Automatically score suppliers based on compliance history and utilize an **In-App Mailer** to draft and dispatch compliance notices internally.
+*   **Audit Export**: One-click CSV export of your Exception Audit Logs for offline auditor review.
 
-### Frontend
-- **Framework**: React (Vite)
-- **Styling**: Tailwind CSS, Shadcn UI
-- **Routing**: React Router
-- **Visualizations**: Recharts (Analytics), React Flow (Knowledge Graphs)
+## 🛠️ Technology Stack
 
-### Backend
-- **Framework**: FastAPI (Python)
-- **Database**: SQLite / PostgreSQL (Relational), Neo4j (Graph Database)
-- **AI Integration**: Google Gemini Pro API
-- **Data Processing**: Pandas (CSV Parsing and Validation)
+*   **Frontend**: React 18, TypeScript, Vite, TailwindCSS, Shadcn UI, Framer Motion, React Router, Recharts, React Flow.
+*   **Backend**: FastAPI, Python 3.
+*   **Data & AI**: Neo4j (Graph Database), PostgreSQL, Google Gemini AI API.
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
-- Python (3.10+)
-- (Optional) Neo4j Desktop or AuraDB instance for graph features
+* Node.js (v18+)
+* Python (3.9+)
 
-### Local Development Setup
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Namratha36/Gst-reconciliation.git
-   cd Gst-reconciliation
-   ```
+### Backend Setup
+```bash
+cd backend
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# Unix:
+source venv/bin/activate
 
-2. **Backend Setup**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   
-   # Start the FastAPI server
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-3. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   
-   # Start the Vite development server
-   npm run dev
-   ```
-
-4. **Environment Variables**
-   Create a `.env` file in the `backend` directory with the following (mock/local) configurations:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   NEO4J_URI=bolt://localhost:7687
-   NEO4J_USER=neo4j
-   NEO4J_PASSWORD=password
-   ```
-
-## License
+## 🔒 License
 This project is licensed under the MIT License.

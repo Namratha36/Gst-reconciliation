@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileUp, Network, PieChart, FileText, Settings, LogOut, Menu, Search, Bell, Moon, Sun, Command } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  LayoutDashboard, FileUp, Network, PieChart, FileText, Settings, 
+  LogOut, Menu, Search, Bell, Moon, Sun, Command, 
+  Users, Bot, Calculator, ShieldAlert, Calendar, Map
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/dashboard" },
-  { icon: FileUp, label: "Upload Data", path: "/upload" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: FileUp, label: "Upload GST Files", path: "/upload" },
   { icon: Network, label: "Reconciliation", path: "/reconciliation" },
   { icon: PieChart, label: "Graph Explorer", path: "/graph" },
-  { icon: FileText, label: "Audit Reports", path: "/reports" },
+  { icon: Users, label: "Vendor Intelligence", path: "/vendors" },
+  { icon: Bot, label: "AI GST Copilot", path: "/copilot" },
+  { icon: Calculator, label: "ITC Simulator", path: "/simulator" },
+  { icon: ShieldAlert, label: "Fraud Detection", path: "/fraud" },
+  { icon: FileText, label: "Reports", path: "/reports" },
+  { icon: Bell, label: "Alerts", path: "/alerts" },
+  { icon: Calendar, label: "Compliance Calendar", path: "/calendar" },
+  { icon: Map, label: "Heatmap", path: "/heatmap" },
 ];
 
 export default function AppLayout() {
@@ -20,74 +32,110 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
+  // Show onboarding wizard logic
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem("onboarding_completed");
+    if (!hasSeenOnboarding && location.pathname !== "/onboarding") {
+      navigate("/onboarding");
+    }
+  }, [navigate, location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.setItem("explicit_logout", "true");
     toast.success("Logged out successfully");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-background flex text-foreground font-sans">
-      {/* Sidebar - Strict Enterprise Dark (#0F172A) */}
-      <aside
-        className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[hsl(var(--sidebar-bg))] text-slate-300 flex flex-col hidden md:flex sticky top-0 h-screen z-40 transition-all duration-200 border-r border-border/10`}
+    <div className="min-h-screen bg-background flex text-foreground font-sans selection:bg-primary/30 overflow-hidden">
+      {/* Sidebar - Animated with Framer Motion */}
+      <motion.aside
+        initial={false}
+        animate={{ 
+          width: isSidebarOpen ? 260 : 72,
+        }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        className={`bg-[hsl(var(--sidebar-bg))] text-slate-300 flex flex-col sticky top-0 h-screen z-40 border-r border-border/10 overflow-hidden ${isSidebarOpen ? 'absolute md:relative' : 'hidden md:flex'}`}
       >
-        <div className="h-16 px-4 flex items-center justify-between border-b border-white/5">
-          {isSidebarOpen && (
-            <div className="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-              <Network className="w-5 h-5 text-secondary" />
-              GraphGST AI
-            </div>
-          )}
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-white hover:bg-white/10">
-            <Menu className="w-4 h-4" />
-          </Button>
+        <div className="h-16 px-4 flex items-center justify-between border-b border-white/5 shrink-0">
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                className="font-bold text-[17px] text-white tracking-tight flex items-center gap-2 whitespace-nowrap"
+              >
+                <div className="w-7 h-7 rounded bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <Network className="w-4 h-4 text-white" />
+                </div>
+                GraphGST AI
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <nav className="flex-1 px-3 py-6 space-y-1">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-4 px-3 space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname.startsWith(item.path);
             return (
-              <Link to={item.path} key={item.path}>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start h-9 px-3 ${isActive ? 'bg-secondary/10 text-secondary font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5'} ${!isSidebarOpen ? 'justify-center px-0' : ''}`}
-                >
-                  <item.icon className={`w-4 h-4 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-secondary' : ''}`} />
-                  {isSidebarOpen && <span>{item.label}</span>}
-                </Button>
+              <Link to={item.path} key={item.path} onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}>
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full h-9 px-3 my-0.5 whitespace-nowrap ${isActive ? 'bg-primary/20 text-white font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5'} ${!isSidebarOpen ? 'justify-center px-0' : 'justify-start'}`}
+                    title={!isSidebarOpen ? item.label : undefined}
+                  >
+                    <item.icon className={`w-4 h-4 shrink-0 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-primary' : ''}`} />
+                    <AnimatePresence>
+                      {isSidebarOpen && (
+                        <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Button>
+                </motion.div>
               </Link>
             );
           })}
-        </nav>
+        </div>
 
-        <div className="p-3 border-t border-white/5">
-          <Button variant="ghost" className={`w-full justify-start h-9 px-3 text-slate-400 hover:text-white hover:bg-white/5 ${!isSidebarOpen ? 'justify-center px-0' : ''}`}>
-            <Settings className={`w-4 h-4 ${isSidebarOpen ? 'mr-3' : ''}`} />
-            {isSidebarOpen && <span>Settings</span>}
+        <div className="p-3 border-t border-white/5 shrink-0 bg-[hsl(var(--sidebar-bg))]">
+          <Button variant="ghost" className={`w-full h-9 px-3 text-slate-400 hover:text-white hover:bg-white/5 whitespace-nowrap ${!isSidebarOpen ? 'justify-center px-0' : 'justify-start'}`}>
+            <Settings className={`w-4 h-4 shrink-0 ${isSidebarOpen ? 'mr-3' : ''}`} />
+            <AnimatePresence>
+              {isSidebarOpen && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Settings</motion.span>}
+            </AnimatePresence>
           </Button>
           <Button 
             variant="ghost" 
             onClick={handleLogout}
-            className={`w-full justify-start h-9 px-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 mt-1 ${!isSidebarOpen ? 'justify-center px-0' : ''}`}
+            className={`w-full h-9 px-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 mt-1 whitespace-nowrap ${!isSidebarOpen ? 'justify-center px-0' : 'justify-start'}`}
           >
-            <LogOut className={`w-4 h-4 ${isSidebarOpen ? 'mr-3' : ''}`} />
-            {isSidebarOpen && <span>Logout</span>}
+            <LogOut className={`w-4 h-4 shrink-0 ${isSidebarOpen ? 'mr-3' : ''}`} />
+            <AnimatePresence>
+              {isSidebarOpen && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Logout</motion.span>}
+            </AnimatePresence>
           </Button>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 bg-card border-b flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative max-w-md w-full hidden md:flex items-center">
+        <header className="h-16 bg-card border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 shadow-sm transition-colors shrink-0">
+          <div className="flex items-center gap-2 flex-1">
+            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!isSidebarOpen)} className="shrink-0 mr-2">
+              <Menu className="w-5 h-5" />
+            </Button>
+            <div className="relative max-w-md w-full hidden sm:flex items-center">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 type="text" 
                 placeholder="Search invoices, vendors, or GSTINs..." 
-                className="pl-9 pr-12 h-9 bg-muted/50 border-transparent focus-visible:ring-1 focus-visible:border-border"
+                className="pl-9 pr-12 h-9 bg-muted/50 border-transparent focus-visible:ring-1 focus-visible:ring-primary shadow-inner"
               />
               <div className="absolute right-2.5 flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border shadow-sm">
                 <Command className="w-3 h-3" /> K
@@ -95,14 +143,7 @@ export default function AppLayout() {
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mr-2 px-3 py-1.5 bg-muted/50 rounded-md border border-border/50">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-              </span>
-              System Healthy
-            </div>
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -111,24 +152,32 @@ export default function AppLayout() {
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground relative">
               <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive border border-card"></span>
             </Button>
-            <div className="flex items-center gap-3 border-l pl-4 border-border ml-2">
+            <div className="flex items-center gap-3 border-l pl-3 md:pl-4 border-border ml-1 md:ml-2">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold leading-none">Auditor Admin</p>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wider mt-0.5">Gov Tax Dept</p>
+                <p className="text-sm font-semibold leading-none text-foreground">Jane Doe</p>
+                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">CFO • Acme Corp</p>
               </div>
-              <div className="w-8 h-8 rounded bg-secondary/10 flex items-center justify-center text-secondary font-bold text-sm">
-                AA
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md">
+                JD
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-auto bg-background">
-          <Outlet />
+        {/* Page Content with Fade In */}
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto bg-background">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
     </div>
