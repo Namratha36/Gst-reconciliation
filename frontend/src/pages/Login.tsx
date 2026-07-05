@@ -14,14 +14,13 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const formData = new URLSearchParams();
-      formData.append("username", email);
-      formData.append("password", password);
-
-      const res = await api.post("/auth/login", formData, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      });
-      localStorage.setItem("token", res.data.access_token);
+      // Mocking the backend for the Vercel hackathon demo
+      toast.info("Authenticating...");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      
+      localStorage.setItem("token", "demo-token-123");
+      localStorage.removeItem("explicit_logout");
+      toast.success("Login successful");
       navigate("/dashboard");
     } catch (err) {
       alert("Login failed. Check credentials.");

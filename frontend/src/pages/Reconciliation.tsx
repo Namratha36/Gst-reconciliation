@@ -17,7 +17,13 @@ export default function Reconciliation() {
         const vendRes = await api.get("/dashboard/vendor-analytics");
         setVendors(vendRes.data);
       } catch (e) {
-        console.error("Failed to load reconciliation data", e);
+        console.error("Failed to load reconciliation data. Using mock data for Vercel demo.", e);
+        setVendors([
+          { name: "Apex Manufacturing", mismatch_count: 54, risk_score: 85 },
+          { name: "GlobalTech Solutions", mismatch_count: 12, risk_score: 65 },
+          { name: "Nexus Imports", mismatch_count: 4, risk_score: 35 },
+          { name: "Acme Logistics", mismatch_count: 2, risk_score: 20 },
+        ]);
       } finally {
         setLoading(false);
       }

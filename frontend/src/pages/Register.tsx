@@ -16,7 +16,10 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post("/auth/register", { email, password, full_name: fullName });
+      // Mocking the backend for the Vercel hackathon demo
+      toast.info("Creating account...");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
       toast.success("Account created successfully. Please login.");
       navigate("/login");
     } catch (err: any) {

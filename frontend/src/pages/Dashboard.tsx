@@ -23,7 +23,20 @@ export default function Dashboard() {
         setSummary(sumRes.data);
         setVendors(vendRes.data);
       } catch (e) {
-        console.error("Failed to load dashboard data", e);
+        console.error("Failed to load dashboard data. Using mock data for Vercel demo.", e);
+        setSummary({
+          total_invoices: 14205,
+          matched_invoices: 12500,
+          itc_at_risk: 2450000,
+          high_risk_vendors: 14
+        });
+        setVendors([
+          { name: "Vendor A (High Risk)", risk_score: 85 },
+          { name: "Vendor B (Medium Risk)", risk_score: 72 },
+          { name: "Vendor C (Low Risk)", risk_score: 45 },
+          { name: "Vendor D (Low Risk)", risk_score: 30 },
+          { name: "Vendor E (Low Risk)", risk_score: 25 },
+        ]);
       } finally {
         setLoading(false);
       }
