@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, FileUp, Network, PieChart, FileText, Settings, 
   LogOut, Menu, Search, Bell, Moon, Sun, Command, 
-  Users, Bot, Calculator, ShieldAlert, Calendar, Map
+  Users, Bot, Calculator, ShieldAlert, Calendar, Map, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
@@ -12,18 +12,17 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: LayoutDashboard, label: "Mission Control", path: "/dashboard" },
   { icon: FileUp, label: "Upload GST Files", path: "/upload" },
-  { icon: Network, label: "Reconciliation", path: "/reconciliation" },
-  { icon: PieChart, label: "Graph Explorer", path: "/graph" },
+  { icon: Map, label: "Operations Board", path: "/operations" },
+  { icon: FileText, label: "Compliance Cases", path: "/cases" },
+  { icon: Zap, label: "Action Center", path: "/actions" },
+  { icon: PieChart, label: "Knowledge Graph", path: "/graph" },
   { icon: Users, label: "Vendor Intelligence", path: "/vendors" },
-  { icon: Bot, label: "AI GST Copilot", path: "/copilot" },
-  { icon: Calculator, label: "ITC Simulator", path: "/simulator" },
-  { icon: ShieldAlert, label: "Fraud Detection", path: "/fraud" },
-  { icon: FileText, label: "Reports", path: "/reports" },
+  { icon: Bot, label: "AI Copilot", path: "/copilot" },
+  { icon: ShieldAlert, label: "Approvals", path: "/approvals" },
+  { icon: LayoutDashboard, label: "Reports", path: "/reports" },
   { icon: Bell, label: "Alerts", path: "/alerts" },
-  { icon: Calendar, label: "Compliance Calendar", path: "/calendar" },
-  { icon: Map, label: "Heatmap", path: "/heatmap" },
 ];
 
 export default function AppLayout() {

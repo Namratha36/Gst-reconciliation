@@ -50,7 +50,7 @@ export default function Vendors() {
                 <th className="px-6 py-3 font-medium">Vendor Name</th>
                 <th className="px-6 py-3 font-medium">Compliance Score</th>
                 <th className="px-6 py-3 font-medium">Risk Tier</th>
-                <th className="px-6 py-3 font-medium">Pending Invoices</th>
+                <th className="px-6 py-3 font-medium">Pending Cases</th>
                 <th className="px-6 py-3 font-medium">ITC Exposure</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>

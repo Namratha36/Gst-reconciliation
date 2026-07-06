@@ -12,15 +12,15 @@ type Message = {
 };
 
 const suggestedPrompts = [
-  "Which vendor is causing maximum ITC risk?",
-  "Show invoices with GST mismatch.",
-  "How much ITC can I recover?",
-  "Why is Vendor ABC risky?"
+  "Which cases need my approval?",
+  "What should the finance team do today?",
+  "Generate a recovery strategy for Acme Logistics.",
+  "Which vendors should we escalate?"
 ];
 
 export default function Copilot() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hello! I am your AI GST Copilot. I can analyze vendors, identify ITC risks, and explain complex GST mismatches. How can I assist you today?" }
+    { role: "assistant", content: "Hello Jane! I am your Autonomous GST Compliance Agent. I am currently monitoring 18 open cases and have recovered ₹3.2L today. How can I assist you?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,17 +41,14 @@ export default function Copilot() {
     setLoading(true);
 
     try {
-      // Stubbing the backend API call for now. 
-      // In production, this hits /api/ai/chat with the message history
       const res = await api.post("/ai/chat", { message: text });
       setMessages([...newMessages, { role: "assistant", content: res.data.response }]);
     } catch (err) {
       console.error(err);
-      // Mock fallback if backend isn't ready
       setTimeout(() => {
         setMessages([...newMessages, { 
           role: "assistant", 
-          content: "Based on the latest data ingestion, Vendor ABC has 5 pending invoices causing ₹2.4L in ITC blockage. I recommend sending them an automated follow-up email." 
+          content: "I have analyzed the current workflow queue. There are 2 actions awaiting your review in the Approvals Center (including a High Priority escalation for Beta Industries). Would you like me to open the approval queue for you?" 
         }]);
         setLoading(false);
       }, 1500);

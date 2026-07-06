@@ -21,6 +21,10 @@ import Heatmap from "./pages/Heatmap";
 import Fraud from "./pages/Fraud";
 import Alerts from "./pages/Alerts";
 import Calendar from "./pages/Calendar";
+import OperationsBoard from "./pages/OperationsBoard";
+import Cases from "./pages/Cases";
+import Actions from "./pages/Actions";
+import Approvals from "./pages/Approvals";
 
 export default function App() {
   return (
@@ -51,6 +55,10 @@ export default function App() {
             <Route path="/fraud" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Fraud /></ErrorBoundary>} />
             <Route path="/alerts" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Alerts /></ErrorBoundary>} />
             <Route path="/calendar" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Calendar /></ErrorBoundary>} />
+            <Route path="/operations" element={<ErrorBoundary FallbackComponent={ErrorFallback}><OperationsBoard /></ErrorBoundary>} />
+            <Route path="/cases" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Cases /></ErrorBoundary>} />
+            <Route path="/actions" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Actions /></ErrorBoundary>} />
+            <Route path="/approvals" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Approvals /></ErrorBoundary>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />

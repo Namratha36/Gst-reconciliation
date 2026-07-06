@@ -46,7 +46,7 @@ export default function Landing() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-6 border border-primary/20 shadow-sm"
             >
               <ShieldCheck className="w-4 h-4" />
-              Enterprise-Grade GST Compliance
+              Autonomous GST Compliance Employee
             </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
@@ -54,7 +54,7 @@ export default function Landing() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1] max-w-4xl"
             >
-              The intelligence layer for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">supply chain</span>.
+              Detect risks. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Coordinate recovery.</span> Resolve compliance issues.
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -62,7 +62,7 @@ export default function Landing() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-muted-foreground max-w-2xl mt-6 leading-relaxed"
             >
-              GraphGST AI helps CFOs and auditors instantly detect circular trading, reconcile millions of invoices, and automatically recover blocked Input Tax Credit (ITC) using Knowledge Graphs and Explainable AI.
+              GraphGST AI behaves like an autonomous GST compliance employee that continuously detects risks, plans recovery, coordinates actions, requests approvals when necessary, and owns every compliance case until the ITC is recovered.
             </motion.p>
             
             <motion.div 
