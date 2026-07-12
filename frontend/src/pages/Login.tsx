@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { authenticationService } from "@/services/authenticationService";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,21 +15,25 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Mocking the backend for the Vercel hackathon demo
       toast.info("Authenticating...");
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      localStorage.setItem("token", "demo-token-123");
-      localStorage.removeItem("explicit_logout");
+      await authenticationService.login({ email, password });
       toast.success("Login successful");
       navigate("/dashboard");
-    } catch (err) {
-      alert("Login failed. Check credentials.");
+    } catch {
+      toast.error("Login failed. Check credentials.");
     }
   };
 
+  const handleDevAccess = () => {
+    authenticationService.startDevSession();
+    toast.success("Dev shell unlocked", {
+      description: "No business data is mocked. Pages will stay empty until backend APIs return data.",
+    });
+    navigate("/dashboard");
+  };
+
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">GraphGST AI</CardTitle>
@@ -48,6 +52,12 @@ export default function Login() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <Button className="w-full" type="submit">Sign in</Button>
+            <Button className="w-full" type="button" variant="outline" onClick={handleDevAccess}>
+              Continue in Dev Shell
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Dev shell only unlocks navigation. It does not create vendors, cases, reports, alerts, invoices, graph data, or AI answers.
+            </p>
             <div className="text-sm text-center text-muted-foreground mt-2">
               Don't have an account? <Link to="/register" className="underline font-semibold">Sign up</Link>
             </div>

@@ -43,3 +43,30 @@ venv.bak/
 # SQLite
 *.sqlite3
 *.db
+
+
+# Python
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# Node
+node_modules/
+
+# Build
+dist/
+build/

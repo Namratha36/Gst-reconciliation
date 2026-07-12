@@ -1,29 +1,34 @@
-import { useState } from "react";
-import { api } from "@/services/api";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UploadCloud, File, AlertCircle } from "lucide-react";
+import { UploadCloud, File, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { uploadService } from "@/services/uploadService";
+import type { Upload } from "@/types/domain";
 
 export default function UploadData() {
   const [files, setFiles] = useState<FileList | null>(null);
+  const [uploads, setUploads] = useState<Upload[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  const refreshUploads = async () => {
+    setUploads(await uploadService.listUploads());
+  };
+
+  useEffect(() => {
+    void refreshUploads();
+  }, []);
 
   const handleUpload = async () => {
     if (!files) return;
     setUploading(true);
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("files", files[i]);
-    }
 
     try {
       toast("Uploading files...", { description: "Ingesting CSV data into the pipeline." });
-      await api.post("/upload/csv", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      toast.success("Ingestion successful. Data is now available for reconciliation.");
+      const result = await uploadService.uploadGstFiles(Array.from(files));
+      toast.success(result.message || "Ingestion successful. Data is now available for reconciliation.");
       setFiles(null);
+      await refreshUploads();
     } catch (err) {
       toast.error("Upload failed", { description: "Invalid schema. Ensure files are GSTR1, GSTR2B, or GSTR3B CSVs." });
     } finally {
@@ -31,8 +36,18 @@ export default function UploadData() {
     }
   };
 
+  const handleDeleteUpload = async (id: string) => {
+    try {
+      await uploadService.deleteUpload(id);
+      setUploads((current) => current.filter((upload) => upload.id !== id));
+      toast.success("Upload deleted");
+    } catch {
+      toast.error("Delete failed", { description: "The backend delete endpoint is not available yet." });
+    }
+  };
+
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-4xl space-y-6 mx-auto">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Data Ingestion</h1>
         <p className="text-sm text-muted-foreground mt-1">Securely upload GST return files to initialize the reconciliation pipeline.</p>
@@ -84,6 +99,33 @@ export default function UploadData() {
               {uploading ? "Ingesting..." : "Start Ingestion"}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-sm border">
+        <CardHeader className="border-b bg-muted/20">
+          <CardTitle className="text-sm font-semibold">Uploaded Files</CardTitle>
+          <CardDescription>Files accepted by the backend ingestion pipeline.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {uploads.length === 0 ? (
+            <div className="p-6 text-sm text-muted-foreground">No uploaded files returned by the backend yet.</div>
+          ) : (
+            <div className="divide-y">
+              {uploads.map((upload) => (
+                <div key={upload.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{upload.fileName}</p>
+                    <p className="text-xs text-muted-foreground">{upload.fileType} - {upload.status} - {upload.rowCount.toLocaleString()} rows</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => void handleDeleteUpload(upload.id)} className="self-start sm:self-auto text-destructive hover:text-destructive">
+                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

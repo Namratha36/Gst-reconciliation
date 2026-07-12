@@ -1,29 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, AlertTriangle, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { vendorService } from "@/services/vendorService";
+import { formatINR } from "@/services/format";
+import type { Vendor } from "@/types/domain";
 
 export default function Vendors() {
-  const vendors = [
-    { name: "Vendor ABC Logistics", score: 42, risk: "High", itc: "₹24.5L", pending: 12, trend: "down" },
-    { name: "XYZ Tech Solutions", score: 88, risk: "Low", itc: "₹5.2L", pending: 1, trend: "up" },
-    { name: "Global Trade Co.", score: 65, risk: "Medium", itc: "₹12.1L", pending: 4, trend: "flat" },
-    { name: "Apex Manufacturing", score: 38, risk: "High", itc: "₹45.8L", pending: 28, trend: "down" },
-    { name: "Sunrise Exports", score: 94, risk: "Low", itc: "₹2.0L", pending: 0, trend: "up" },
-  ];
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
-  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
-
-  const handleOpenNotice = (vendorName: string) => {
-    setSelectedVendor(vendorName);
-  };
+  useEffect(() => {
+    void vendorService.listVendors().then(setVendors);
+  }, []);
 
   const handleSendNotice = () => {
-    toast.success("Notice Sent Successfully", {
-      description: `The compliance notice has been dispatched to ${selectedVendor} via GraphGST servers.`,
-    });
-    setSelectedVendor(null);
+    if (!selectedVendor) return;
+    void vendorService.createNoticeApproval(selectedVendor.id)
+      .then(() => {
+        toast.success("Approval request created");
+        setSelectedVendor(null);
+      })
+      .catch(() => {
+        toast.error("Could not create approval request", { description: "The backend vendor notice endpoint is not available yet." });
+      });
   };
 
   return (
@@ -31,7 +32,7 @@ export default function Vendors() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Vendor Intelligence Center</h1>
-          <p className="text-sm text-muted-foreground mt-1">Monitor supplier compliance, risk scores, and ITC exposure.</p>
+          <p className="text-sm text-muted-foreground mt-1">Vendor analytics derived from cases, reconciliation status, and risk scoring.</p>
         </div>
       </div>
 
@@ -41,103 +42,104 @@ export default function Vendors() {
             <Users className="w-4 h-4 mr-2 text-primary" />
             Vendor Risk Matrix
           </CardTitle>
-          <CardDescription>Real-time compliance scoring based on GST filing history.</CardDescription>
+          <CardDescription>Replaceable service data, ready for Supabase or REST-backed analytics.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-muted/40 text-xs uppercase text-muted-foreground border-b">
-              <tr>
-                <th className="px-6 py-3 font-medium">Vendor Name</th>
-                <th className="px-6 py-3 font-medium">Compliance Score</th>
-                <th className="px-6 py-3 font-medium">Risk Tier</th>
-                <th className="px-6 py-3 font-medium">Pending Cases</th>
-                <th className="px-6 py-3 font-medium">ITC Exposure</th>
-                <th className="px-6 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {vendors.map((v, i) => (
-                <tr key={i} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">{v.name}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${v.score > 80 ? 'bg-success' : v.score > 50 ? 'bg-warning' : 'bg-destructive'}`} 
-                          style={{ width: `${v.score}%` }} 
-                        />
-                      </div>
-                      <span className="text-xs font-bold">{v.score}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${
-                      v.risk === 'High' ? 'bg-destructive/10 text-destructive border-destructive/20' :
-                      v.risk === 'Medium' ? 'bg-warning/10 text-warning-foreground border-warning/20' :
-                      'bg-success/10 text-success border-success/20'
-                    }`}>
-                      {v.risk === 'High' && <AlertTriangle className="w-3 h-3 mr-1" />}
-                      {v.risk === 'Low' && <ShieldCheck className="w-3 h-3 mr-1" />}
-                      {v.risk}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground">{v.pending}</td>
-                  <td className="px-6 py-4 font-medium">{v.itc}</td>
-                  <td className="px-6 py-4 text-right">
-                    {v.risk !== 'Low' && (
-                      <Button variant="outline" size="sm" onClick={() => handleOpenNotice(v.name)} className="h-8 text-xs">
-                        <Mail className="w-3 h-3 mr-1.5" />
-                        Send Notice
-                      </Button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted/40 text-xs uppercase text-muted-foreground border-b">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Vendor Name</th>
+                  <th className="px-6 py-3 font-medium">Compliance Score</th>
+                  <th className="px-6 py-3 font-medium">Risk Tier</th>
+                  <th className="px-6 py-3 font-medium">Pending Cases</th>
+                  <th className="px-6 py-3 font-medium">ITC Exposure</th>
+                  <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+              {vendors.map((vendor) => (
+                  <tr key={vendor.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-semibold text-foreground">{vendor.name}</p>
+                      <p className="text-xs text-muted-foreground">{vendor.gstin}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className={`h-full ${vendor.complianceScore > 80 ? "bg-success" : vendor.complianceScore > 50 ? "bg-warning" : "bg-destructive"}`} style={{ width: `${vendor.complianceScore}%` }} />
+                        </div>
+                        <span className="text-xs font-bold">{vendor.complianceScore}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${riskClass(vendor.riskTier)}`}>
+                        {(vendor.riskTier === "High" || vendor.riskTier === "Critical") && <AlertTriangle className="w-3 h-3 mr-1" />}
+                        {vendor.riskTier === "Low" && <ShieldCheck className="w-3 h-3 mr-1" />}
+                        {vendor.riskTier}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">{vendor.pendingCaseCount}</td>
+                    <td className="px-6 py-4 font-medium">{formatINR(vendor.itcExposure)}</td>
+                    <td className="px-6 py-4 text-right">
+                      {vendor.riskTier !== "Low" && (
+                        <Button variant="outline" size="sm" onClick={() => setSelectedVendor(vendor)} className="h-8 text-xs">
+                          <Mail className="w-3 h-3 mr-1.5" />
+                          Draft Notice
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
               ))}
             </tbody>
           </table>
+          {vendors.length === 0 && <div className="p-6 text-sm text-muted-foreground">No vendors returned by the backend.</div>}
+        </div>
         </CardContent>
       </Card>
 
-      {/* In-App Email Modal */}
       {selectedVendor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="bg-card w-full max-w-lg border rounded-xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="bg-card w-full max-w-lg border rounded-lg shadow-2xl overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b bg-muted/20 flex justify-between items-center">
               <h3 className="font-semibold text-foreground flex items-center">
                 <Mail className="w-4 h-4 mr-2 text-primary" />
                 Draft Compliance Notice
               </h3>
-              <button onClick={() => setSelectedVendor(null)} className="text-muted-foreground hover:text-foreground">✕</button>
+              <button onClick={() => setSelectedVendor(null)} className="text-muted-foreground hover:text-foreground">x</button>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">To</label>
-                <div className="text-sm font-medium bg-muted/50 px-3 py-2 rounded border border-transparent">
-                  contact@{selectedVendor.replace(/\s+/g, '').toLowerCase()}.com
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Subject</label>
-                <div className="text-sm font-medium bg-muted/50 px-3 py-2 rounded border border-transparent">
-                  Urgent: Pending GSTR-1 Filing & ITC Discrepancy
-                </div>
-              </div>
+              <Field label="To" value={selectedVendor.email} />
+              <Field label="Subject" value="Urgent: GST reconciliation discrepancy" />
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Message Body</label>
                 <div className="text-sm text-foreground bg-muted/20 p-4 rounded border whitespace-pre-wrap leading-relaxed h-40 overflow-y-auto font-mono text-[13px]">
-                  Dear {selectedVendor} team,{"\n\n"}We have identified pending invoices causing an Input Tax Credit mismatch in our latest reconciliation.{"\n\n"}Please file your pending GSTR-1 returns immediately to avoid delayed payments.{"\n\n"}Thank you,{"\n"}GraphGST AI Compliance Team
+                  Dear {selectedVendor.name} team,{"\n\n"}GraphGST AI identified pending reconciliation issues linked to your GSTIN {selectedVendor.gstin}. Please review the related filing and invoice data.{"\n\n"}This action will create an approval request before any email provider sends it.
                 </div>
               </div>
             </div>
             <div className="px-6 py-4 border-t bg-muted/20 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setSelectedVendor(null)}>Cancel</Button>
-              <Button onClick={handleSendNotice} className="bg-primary text-white hover:bg-primary/90">
-                Send via GraphGST Server
-              </Button>
+              <Button onClick={handleSendNotice} className="bg-primary text-white hover:bg-primary/90">Create Approval Request</Button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">{label}</label>
+      <div className="text-sm font-medium bg-muted/50 px-3 py-2 rounded border border-transparent">{value}</div>
+    </div>
+  );
+}
+
+function riskClass(risk: string) {
+  if (risk === "Critical" || risk === "High") return "bg-destructive/10 text-destructive border-destructive/20";
+  if (risk === "Medium") return "bg-warning/10 text-warning-foreground border-warning/20";
+  return "bg-success/10 text-success border-success/20";
 }
