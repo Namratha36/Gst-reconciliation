@@ -1,4 +1,4 @@
-import { FallbackProps } from "react-error-boundary";
+import type { FallbackProps } from "react-error-boundary";
 import { Button } from "@/components/ui/button";
 import { AlertOctagon, RefreshCcw, Home } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ export default function ErrorFallback({ error, resetErrorBoundary }: FallbackPro
         We encountered an unexpected error while trying to load this view. 
         <br />
         <span className="text-xs mt-2 block font-mono text-destructive/70 bg-destructive/5 p-2 rounded">
-          {error.message}
+          {error instanceof Error ? error.message : "Unknown application error"}
         </span>
       </p>
       

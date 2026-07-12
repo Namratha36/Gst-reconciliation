@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { authenticationService } from "@/services/authenticationService";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -16,19 +16,17 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Mocking the backend for the Vercel hackathon demo
       toast.info("Creating account...");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      toast.success("Account created successfully. Please login.");
-      navigate("/login");
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Registration failed. Backend might be down.");
+      await authenticationService.register({ email, password, name: fullName, organizationName: "Acme Corp" });
+      toast.success("Account created successfully.");
+      navigate("/dashboard");
+    } catch {
+      toast.error("Registration failed. Backend might be down.");
     }
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Register</CardTitle>

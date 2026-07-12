@@ -1,12 +1,16 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { calendarService } from "@/services/calendarService";
+import { formatDate } from "@/services/format";
+import type { ComplianceEvent } from "@/types/domain";
 
 export default function Calendar() {
-  const events = [
-    { date: 'July 11, 2026', title: 'GSTR-1 Due Date', type: 'Filing', status: 'Upcoming' },
-    { date: 'July 14, 2026', title: 'GSTR-2B Generation', type: 'System', status: 'Pending' },
-    { date: 'July 20, 2026', title: 'GSTR-3B Due Date', type: 'Filing', status: 'Upcoming' },
-  ];
+  const [events, setEvents] = useState<ComplianceEvent[]>([]);
+
+  useEffect(() => {
+    void calendarService.listComplianceEvents().then(setEvents);
+  }, []);
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-8">
@@ -21,7 +25,7 @@ export default function Calendar() {
             <CalendarIcon className="w-4 h-4 mr-2 text-primary" />
             Upcoming Deadlines
           </CardTitle>
-          <CardDescription>Never miss a filing date.</CardDescription>
+          <CardDescription>Deadline data from calendar service.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <table className="w-full text-left text-sm">
@@ -34,17 +38,17 @@ export default function Calendar() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {events.map((e, i) => (
-                <tr key={i} className="hover:bg-muted/30 transition-colors">
+              {events.map((event) => (
+                <tr key={event.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4 font-semibold text-foreground flex items-center">
                     <Clock className="w-3 h-3 mr-2 text-muted-foreground" />
-                    {e.date}
+                    {formatDate(event.date)}
                   </td>
-                  <td className="px-6 py-4">{e.title}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{e.type}</td>
+                  <td className="px-6 py-4">{event.title}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{event.type}</td>
                   <td className="px-6 py-4 text-right">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border bg-primary/10 text-primary border-primary/20">
-                      {e.status}
+                      {event.status}
                     </span>
                   </td>
                 </tr>

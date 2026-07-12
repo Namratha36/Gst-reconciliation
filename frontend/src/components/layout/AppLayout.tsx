@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  LayoutDashboard, FileUp, Network, PieChart, FileText, Settings, 
-  LogOut, Menu, Search, Bell, Moon, Sun, Command, 
-  Users, Bot, Calculator, ShieldAlert, Calendar, Map, Zap
+  LayoutDashboard, FileUp, Network, PieChart, FileText,
+  LogOut, Menu, Bell, Moon, Sun,
+  Users, Bot, ShieldAlert, Map, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
+import { authenticationService } from "@/services/authenticationService";
+import type { User } from "@/types/domain";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Mission Control", path: "/dashboard" },
@@ -30,6 +31,7 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Show onboarding wizard logic
   useEffect(() => {
@@ -39,9 +41,12 @@ export default function AppLayout() {
     }
   }, [navigate, location.pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.setItem("explicit_logout", "true");
+  useEffect(() => {
+    void authenticationService.getCurrentUser().then(setCurrentUser);
+  }, []);
+
+  const handleLogout = async () => {
+    await authenticationService.logout();
     toast.success("Logged out successfully");
     navigate("/");
   };
@@ -102,12 +107,6 @@ export default function AppLayout() {
         </div>
 
         <div className="p-3 border-t border-white/5 shrink-0 bg-[hsl(var(--sidebar-bg))]">
-          <Button variant="ghost" className={`w-full h-9 px-3 text-slate-400 hover:text-white hover:bg-white/5 whitespace-nowrap ${!isSidebarOpen ? 'justify-center px-0' : 'justify-start'}`}>
-            <Settings className={`w-4 h-4 shrink-0 ${isSidebarOpen ? 'mr-3' : ''}`} />
-            <AnimatePresence>
-              {isSidebarOpen && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Settings</motion.span>}
-            </AnimatePresence>
-          </Button>
           <Button 
             variant="ghost" 
             onClick={handleLogout}
@@ -125,21 +124,10 @@ export default function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Navbar */}
         <header className="h-16 bg-card border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 shadow-sm transition-colors shrink-0">
-          <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!isSidebarOpen)} className="shrink-0 mr-2">
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="relative max-w-md w-full hidden sm:flex items-center">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                type="text" 
-                placeholder="Search invoices, vendors, or GSTINs..." 
-                className="pl-9 pr-12 h-9 bg-muted/50 border-transparent focus-visible:ring-1 focus-visible:ring-primary shadow-inner"
-              />
-              <div className="absolute right-2.5 flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-background px-1.5 py-0.5 rounded border shadow-sm">
-                <Command className="w-3 h-3" /> K
-              </div>
-            </div>
           </div>
           
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -151,17 +139,13 @@ export default function AppLayout() {
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground relative">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive border border-card"></span>
-            </Button>
             <div className="flex items-center gap-3 border-l pl-3 md:pl-4 border-border ml-1 md:ml-2">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold leading-none text-foreground">Jane Doe</p>
-                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">CFO • Acme Corp</p>
+                <p className="text-sm font-semibold leading-none text-foreground">{currentUser?.name ?? "Signed in"}</p>
+                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{currentUser ? `${currentUser.role} - ${currentUser.organizationName}` : "Backend session"}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md">
-                JD
+                {currentUser?.name?.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() ?? "U"}
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { tokenStore } from "@/services/authenticationService";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -7,7 +8,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = tokenStore.getAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -18,7 +19,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
+      tokenStore.clear();
       // Force reload to trigger ProtectedRoute logic
       window.location.href = "/login";
     }
