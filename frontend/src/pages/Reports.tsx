@@ -21,65 +21,66 @@ export default function Reports() {
   }, [periodStart, periodEnd]);
 
   const report = reports[0];
+  // Normalise metrics — backend returns {label, value}, frontend type expects {id, title, value, trend}
+  const normalizedMetrics = useMemo(() => {
+    if (!report?.metrics) return [];
+    return report.metrics.map((m: Record<string, unknown>, idx: number) => ({
+      id: String(idx),
+      title: (m.title ?? m.label ?? "Metric") as string,
+      value: String(m.value ?? ""),
+      trend: (m.trend ?? "") as string,
+    }));
+  }, [report]);
+
   const sortedMetrics = useMemo(() => {
-    if (!report) return [];
-    if (sortKey === "generatedAt") return report.metrics;
-    return [...report.metrics].sort((left, right) => left.title.localeCompare(right.title));
-  }, [report, sortKey]);
+    if (sortKey === "title") return [...normalizedMetrics].sort((a, b) => a.title.localeCompare(b.title));
+    return normalizedMetrics;
+  }, [normalizedMetrics, sortKey]);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = () => {
     if (!report) return;
-    const exportResult = await reportService.exportReport({ reportId: report.id, format: "pdf" });
-    if (exportResult.downloadUrl) {
-      window.open(exportResult.downloadUrl, "_blank", "noopener,noreferrer");
-      toast.success("PDF report export ready");
-      return;
+    try {
+      const doc = new jsPDF();
+      doc.setFontSize(22);
+      doc.setTextColor(37, 99, 235);
+      doc.text("GraphGST AI Enterprise", 14, 22);
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text(report.title ?? "Report", 14, 32);
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Period: ${formatDate(report.periodStart)} to ${formatDate(report.periodEnd)}`, 14, 40);
+
+      autoTable(doc, {
+        startY: 55,
+        head: [["Metric", "Value"]],
+        body: normalizedMetrics.map((m) => [m.title, m.value]),
+        theme: "grid",
+        headStyles: { fillColor: [37, 99, 235] },
+      });
+
+      const finalY = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 100;
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Compliance Summary", 14, finalY + 15);
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text(doc.splitTextToSize(report.summary ?? "", 180), 14, finalY + 25);
+      doc.save(`graphgst-report-${report.id.slice(0, 8)}.pdf`);
+      toast.success("PDF report exported");
+    } catch {
+      toast.error("PDF export failed");
     }
-
-    const doc = new jsPDF();
-    doc.setFontSize(22);
-    doc.setTextColor(37, 99, 235);
-    doc.text("GraphGST AI Enterprise", 14, 22);
-    doc.setFontSize(16);
-    doc.setTextColor(15, 23, 42);
-    doc.text(report.title, 14, 32);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 116, 139);
-    doc.text(`Period: ${formatDate(report.periodStart)} to ${formatDate(report.periodEnd)}`, 14, 40);
-
-    autoTable(doc, {
-      startY: 55,
-      head: [["Metric", "Value", "Status"]],
-      body: report.metrics.map((metric) => [metric.title, metric.value, metric.trend]),
-      theme: "grid",
-      headStyles: { fillColor: [37, 99, 235] },
-    });
-
-    const finalY = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 100;
-    doc.setFontSize(12);
-    doc.setTextColor(15, 23, 42);
-    doc.text("Compliance Summary", 14, finalY + 15);
-    doc.setFontSize(10);
-    doc.setTextColor(71, 85, 105);
-    doc.text(doc.splitTextToSize(report.summary, 180), 14, finalY + 25);
-    doc.save(`${report.id}.pdf`);
-    toast.success("PDF report exported");
   };
 
-  const handleDownloadCsv = async () => {
+  const handleDownloadCsv = () => {
     if (!report) return;
-    const exportResult = await reportService.exportReport({ reportId: report.id, format: "csv" });
-    if (exportResult.downloadUrl) {
-      window.open(exportResult.downloadUrl, "_blank", "noopener,noreferrer");
-      toast.success("CSV report export ready");
-      return;
-    }
-    const csv = ["Metric,Value,Trend", ...report.metrics.map((metric) => `"${metric.title}","${metric.value}","${metric.trend}"`)].join("\n");
+    const csv = ["Metric,Value", ...normalizedMetrics.map((m) => `"${m.title}","${m.value}"`)].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${report.id}.csv`;
+    link.download = `graphgst-report-${report.id.slice(0, 8)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("CSV report exported");
@@ -141,9 +142,9 @@ export default function Reports() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SummaryCard icon={<AlertTriangle className="w-4 h-4 mr-2 text-destructive" />} title="Financial Exposure" value={report.metrics[1]?.value ?? "Rs. 0"} note={report.metrics[1]?.trend ?? ""} tone="destructive" />
-        <SummaryCard icon={<ShieldCheck className="w-4 h-4 mr-2 text-success" />} title="Resolution Rate" value={report.metrics[3]?.value ?? "0%"} note={report.metrics[3]?.trend ?? ""} tone="success" />
-        <SummaryCard icon={<TrendingUp className="w-4 h-4 mr-2 text-secondary" />} title="Recovery Opportunities" value={report.metrics[2]?.value ?? "Rs. 0"} note={report.metrics[2]?.trend ?? ""} tone="secondary" />
+        <SummaryCard icon={<AlertTriangle className="w-4 h-4 mr-2 text-destructive" />} title={normalizedMetrics[2]?.title ?? "ITC At Risk"} value={String(normalizedMetrics[2]?.value ?? "Rs. 0")} note="Total ITC exposure" tone="destructive" />
+        <SummaryCard icon={<ShieldCheck className="w-4 h-4 mr-2 text-success" />} title={normalizedMetrics[3]?.title ?? "High Risk Vendors"} value={String(normalizedMetrics[3]?.value ?? "0")} note="Vendors needing action" tone="success" />
+        <SummaryCard icon={<TrendingUp className="w-4 h-4 mr-2 text-secondary" />} title={normalizedMetrics[0]?.title ?? "Active Cases"} value={String(normalizedMetrics[0]?.value ?? "0")} note="Open compliance cases" tone="secondary" />
       </div>
 
       <Card className="shadow-sm">
@@ -167,11 +168,11 @@ export default function Reports() {
               </thead>
               <tbody className="divide-y">
                 {sortedMetrics.map((metric) => (
-                  <tr key={metric.id}>
-                    <td className="px-4 py-3 font-medium">{metric.title}</td>
-                    <td className="px-4 py-3">{metric.value}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{metric.trend}</td>
-                  </tr>
+                   <tr key={metric.id}>
+                     <td className="px-4 py-3 font-medium">{metric.title}</td>
+                     <td className="px-4 py-3 font-semibold text-foreground">{metric.value}</td>
+                     <td className="px-4 py-3 text-muted-foreground">{metric.trend || "—"}</td>
+                   </tr>
                 ))}
               </tbody>
             </table>

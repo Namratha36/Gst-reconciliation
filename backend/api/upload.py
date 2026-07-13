@@ -1,53 +1,26 @@
-import os
-import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File
+from sqlalchemy.orm import Session
 from typing import List
-
-from services.csv_processor import process_gstr1, process_gstr2b
-from services.graph_builder import build_graph_from_gstr1, build_graph_from_gstr2b
+from database.postgres import get_db
+from schemas.upload import UploadResponse, UploadResultResponse, DeleteResponse
+from services import upload_service
+from core.dependencies import get_current_user
+from models.user import User
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+@router.post("/csv", response_model=UploadResultResponse)
+def upload_csv(
+    files: List[UploadFile] = File(...), 
+    current_user: User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    return upload_service.process_upload(db, files, current_user)
 
-def process_uploaded_files(file_paths: List[str], user_gstin: str):
-    for path in file_paths:
-        filename = os.path.basename(path).lower()
-        try:
-            if filename.startswith("gstr1"):
-                df = process_gstr1(path)
-                build_graph_from_gstr1(df, user_gstin)
-            elif filename.startswith("gstr2b"):
-                df = process_gstr2b(path)
-                build_graph_from_gstr2b(df, user_gstin)
-            # Add gstr3b logic similarly if needed
-        except Exception as e:
-            print(f"Error processing {path}: {e}")
+@router.get("", response_model=List[UploadResponse])
+def get_uploads(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return upload_service.list_uploads(db, current_user.organization_id)
 
-@router.post("/csv")
-async def upload_csv_files(background_tasks: BackgroundTasks, files: List[UploadFile] = File(...)):
-    # In a real app, user_gstin would come from JWT or user profile.
-    # We mock it for the pipeline.
-    user_gstin = "07AAGFF2194N1Z1" 
-    
-    file_paths = []
-    
-    for file in files:
-        if not file.filename.endswith('.csv'):
-            raise HTTPException(status_code=400, detail=f"File {file.filename} is not a CSV.")
-        
-        valid_prefixes = ("gstr1", "gstr2b", "gstr3b")
-        if not file.filename.lower().startswith(valid_prefixes):
-            raise HTTPException(status_code=400, detail=f"File {file.filename} must be GSTR1, GSTR2B, or GSTR3B CSV.")
-            
-        file_location = f"{UPLOAD_DIR}/{file.filename}"
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(file.file, file_object)
-            
-        file_paths.append(file_location)
-        
-    background_tasks.add_task(process_uploaded_files, file_paths, user_gstin)
-        
-    return {"message": "Files uploaded successfully and processing started in background.", "files": [f.filename for f in files]}
-
+@router.delete("/{upload_id}", response_model=DeleteResponse)
+def archive_upload(upload_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return upload_service.delete_upload(db, upload_id, current_user)

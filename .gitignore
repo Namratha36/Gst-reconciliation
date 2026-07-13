@@ -69,4 +69,9 @@ node_modules/
 
 # Build
 dist/
-build/
+build/ 
+backend/uploads/
+__pycache__/
+massive_test_gstr1.csv
+generate_massive_csv.py
+backend/graphgst.db

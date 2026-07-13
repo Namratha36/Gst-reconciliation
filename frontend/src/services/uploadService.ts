@@ -16,7 +16,7 @@ export interface UploadService {
 
 export const uploadService: UploadService = {
   async listUploads() {
-    return getOrEmpty<Upload[]>("/uploads", []);
+    return getOrEmpty<Upload[]>("/upload", []);
   },
 
   async uploadGstFiles(files) {
@@ -31,6 +31,6 @@ export const uploadService: UploadService = {
   },
 
   async deleteUpload(id) {
-    await api.delete(`/uploads/${id}`);
+    await api.delete(`/upload/${id}`);
   },
 };
